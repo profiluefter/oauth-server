@@ -19,6 +19,7 @@ public class HttpApplication extends AbstractVerticle {
     Router router = Router.router(vertx);
 
     router.get("/api/greeting").handler(this::greeting);
+    router.get("/api/login").handler(this::login);
     router.get("/*").handler(StaticHandler.create());
 
     // Create the HTTP server and pass the "accept" method to the request handler.
@@ -48,5 +49,19 @@ public class HttpApplication extends AbstractVerticle {
     rc.response()
         .putHeader(CONTENT_TYPE, "application/json; charset=utf-8")
         .end(response.encodePrettily());
+  }
+  
+  private void login(RoutingContext rc) {
+      String username = rc.request().getParam("username");
+      String password = rc.request().getParam("password");
+      
+      if(username == null || password == null) {
+        //Error
+      }
+      
+      JsonObject jsonResponse = new JsonObject().put("userpass",username + password);
+      rc.response()
+        .putHeader(CONTENT_TYPE, "application/json; charset=utf-8")
+        .end(jsonResponse.encodePrettily());
   }
 }
