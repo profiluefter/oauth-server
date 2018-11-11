@@ -27,8 +27,8 @@ public class HttpApplicationTest {
         vertx = Vertx.vertx();
         vertx.exceptionHandler(context.exceptionHandler());
         vertx.deployVerticle(HttpApplication.class.getName(),
-            new DeploymentOptions().setConfig(new JsonObject().put("http.port", PORT)),
-            context.asyncAssertSuccess());
+                new DeploymentOptions().setConfig(new JsonObject().put("http.port", PORT)),
+                context.asyncAssertSuccess());
         client = WebClient.create(vertx);
     }
 
@@ -42,13 +42,13 @@ public class HttpApplicationTest {
         // Send a request and get a response
         Async async = context.async();
         client.get(PORT, "localhost", "/api/greeting")
-            .send(resp -> {
-                context.assertTrue(resp.succeeded());
-                context.assertEquals(resp.result().statusCode(), 200);
-                String content = resp.result().bodyAsJsonObject().getString("content");
-                context.assertEquals(content, String.format(template, "World"));
-                async.complete();
-            });
+                .send(resp -> {
+                    context.assertTrue(resp.succeeded());
+                    context.assertEquals(resp.result().statusCode(), 200);
+                    String content = resp.result().bodyAsJsonObject().getString("content");
+                    context.assertEquals(content, String.format(template, "World"));
+                    async.complete();
+                });
     }
 
     @Test
@@ -56,13 +56,13 @@ public class HttpApplicationTest {
         // Send a request and get a response
         Async async = context.async();
         client.get(PORT, "localhost", "/api/greeting?name=Charles")
-            .send(resp -> {
-                context.assertTrue(resp.succeeded());
-                context.assertEquals(resp.result().statusCode(), 200);
-                String content = resp.result().bodyAsJsonObject().getString("content");
-                context.assertEquals(content, String.format(template, "Charles"));
-                async.complete();
-            });
+                .send(resp -> {
+                    context.assertTrue(resp.succeeded());
+                    context.assertEquals(resp.result().statusCode(), 200);
+                    String content = resp.result().bodyAsJsonObject().getString("content");
+                    context.assertEquals(content, String.format(template, "Charles"));
+                    async.complete();
+                });
     }
 
 }

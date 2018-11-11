@@ -11,57 +11,58 @@ import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
 public class HttpApplication extends AbstractVerticle {
 
-  static final String template = "Hello, %s!";
+    static final String template = "Hello, %s!";
 
-  @Override
-  public void start(Future<Void> future) {
-    // Create a router object.
-    Router router = Router.router(vertx);
+    @Override
+    public void start(Future<Void> future) {
+        // Create a router object.
+        Router router = Router.router(vertx);
 
-    router.get("/api/greeting").handler(this::greeting);
-    router.get("/api/login").handler(this::login);
-    router.get("/*").handler(StaticHandler.create());
+        router.get("/api/greeting").handler(this::greeting);
+        router.get("/api/login").handler(this::login);
+        router.get("/*").handler(StaticHandler.create());
 
-    // Create the HTTP server and pass the "accept" method to the request handler.
-    vertx
-        .createHttpServer()
-        .requestHandler(router::accept)
-        .listen(
-            // Retrieve the port from the configuration, default to 8080.
-            config().getInteger("http.port", 8080), ar -> {
-              if (ar.succeeded()) {
-                System.out.println("Server started on port " + ar.result().actualPort());
-              }
-              future.handle(ar.mapEmpty());
-            });
+        // Create the HTTP server and pass the "accept" method to the request handler.
+        vertx
+                .createHttpServer()
+                .requestHandler(router::accept)
+                .listen(
+                        // Retrieve the port from the configuration, default to 8080.
+                        config().getInteger("http.port", 8080), ar -> {
+                            if (ar.succeeded()) {
+                                System.out.println("Server started on port " + ar.result().actualPort());
+                            }
+                            future.handle(ar.mapEmpty());
+                        });
 
-  }
-
-  private void greeting(RoutingContext rc) {
-    String name = rc.request().getParam("name");
-    if (name == null) {
-      name = "World";
     }
 
-    JsonObject response = new JsonObject()
-        .put("content", String.format(template, name));
+    private void greeting(RoutingContext rc) {
+        String name = rc.request().getParam("name");
+        if (name == null) {
+            name = "World";
+        }
 
-    rc.response()
-        .putHeader(CONTENT_TYPE, "application/json; charset=utf-8")
-        .end(response.encodePrettily());
-  }
-  
-  private void login(RoutingContext rc) {
-      String username = rc.request().getParam("username");
-      String password = rc.request().getParam("password");
-      
-      if(username == null || password == null) {
-        //Error
-      }
-      
-      JsonObject jsonResponse = new JsonObject().put("userpass",username + password);
-      rc.response()
-        .putHeader(CONTENT_TYPE, "application/json; charset=utf-8")
-        .end(jsonResponse.encodePrettily());
-  }
+        JsonObject response = new JsonObject()
+                .put("content", String.format(template, name));
+
+        rc.response()
+                .putHeader(CONTENT_TYPE, "application/json; charset=utf-8")
+                .end(response.encodePrettily());
+    }
+
+    private void login(RoutingContext rc) {
+        String username = rc.request().getParam("username");
+        String password = rc.request().getParam("password");
+
+        //noinspection StatementWithEmptyBody
+        if (username == null || password == null) {
+            //Error
+        }
+
+        JsonObject jsonResponse = new JsonObject().put("userpass", username + password);
+        rc.response()
+                .putHeader(CONTENT_TYPE, "application/json; charset=utf-8")
+                .end(jsonResponse.encodePrettily());
+    }
 }

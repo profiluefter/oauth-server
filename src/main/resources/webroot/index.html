@@ -16,18 +16,21 @@
 
     <div>
         <div class="sect1">
-<h2 id="_http_booster">HTTP Booster</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>An example of simple mapping of a business operation to a remote endpoint. By taking this approach, clients use the HTTP protocol as a transport mechanism to call services. Application engineers define the APIs using a broad interpretation of the REST fundamentals, encouraging freedom in design and quick prototyping.</p>
-</div>
-<div class="sect2">
-<h3 id="_using_the_greeting_service">Using the greeting service</h3>
+            <h2 id="_http_booster">HTTP Booster</h2>
+            <div class="sectionbody">
+                <div class="paragraph">
+                    <p>An example of simple mapping of a business operation to a remote endpoint. By taking this
+                        approach, clients use the HTTP protocol as a transport mechanism to call services. Application
+                        engineers define the APIs using a broad interpretation of the REST fundamentals, encouraging
+                        freedom in design and quick prototyping.</p>
+                </div>
+                <div class="sect2">
+                    <h3 id="_using_the_greeting_service">Using the greeting service</h3>
 
-</div>
-</div>
-</div>
-        
+                </div>
+            </div>
+        </div>
+
         <form class="form-inline">
             <div class="form-group">
                 <label for="name">Name</label>
@@ -47,14 +50,14 @@
         crossorigin="anonymous"></script>
 
 <script>
-    $(document).ready(function() {
-       $("#invoke").click(function(e) {
-          var n = $("#name").val() || "World";
-          $.getJSON("/api/greeting?name=" + n, function(res) {
-              $("#greeting-result").text(JSON.stringify(res));
-          });
-          e.preventDefault();
-       });
+    $(document).ready(function () {
+        $("#invoke").click(function (e) {
+            var n = $("#name").val() || "World";
+            $.getJSON("/api/greeting?name=" + n, function (res) {
+                $("#greeting-result").text(JSON.stringify(res));
+            });
+            e.preventDefault();
+        });
     });
 </script>
 
