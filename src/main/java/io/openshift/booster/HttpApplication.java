@@ -3,6 +3,7 @@ package io.openshift.booster;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.StaticHandler;
@@ -12,6 +13,8 @@ import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 public class HttpApplication extends AbstractVerticle {
 
     static final String template = "Hello, %s!";
+    private JDBCClient sql;
+
 
     @Override
     public void start(Future<Void> future) {
@@ -21,6 +24,7 @@ public class HttpApplication extends AbstractVerticle {
         router.get("/api/greeting").handler(this::greeting);
         router.get("/api/login").handler(this::login);
         router.get("/*").handler(StaticHandler.create());
+
 
         // Create the HTTP server and pass the "accept" method to the request handler.
         vertx
@@ -34,7 +38,9 @@ public class HttpApplication extends AbstractVerticle {
                             }
                             future.handle(ar.mapEmpty());
                         });
-
+        sql = JDBCClient.createShared(vertx, new JsonObject().put("url", "jdbc:sqlite:database.sqlite3")
+                .put("driver_class", "org.sqlite.JDBC")
+                .put("max_pool_size", 30));
     }
 
     private void greeting(RoutingContext rc) {
