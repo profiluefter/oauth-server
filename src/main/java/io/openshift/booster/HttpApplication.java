@@ -2,11 +2,17 @@ package io.openshift.booster;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.CookieHandler;
+import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.handler.StaticHandler;
+import io.vertx.ext.web.sstore.LocalSessionStore;
+
+import java.util.Arrays;
 
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
@@ -15,14 +21,16 @@ public class HttpApplication extends AbstractVerticle {
     static final String template = "Hello, %s!";
     private JDBCClient sql;
 
-
     @Override
     public void start(Future<Void> future) {
         // Create a router object.
         Router router = Router.router(vertx);
 
-        router.get("/api/greeting").handler(this::greeting);
+        router.route().handler(CookieHandler.create());
+        router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
+
         router.get("/api/login").handler(this::login);
+        router.get("/api/logout").handler(this::logout);
         router.get("/*").handler(StaticHandler.create());
 
 
@@ -43,32 +51,44 @@ public class HttpApplication extends AbstractVerticle {
                 .put("max_pool_size", 30));
     }
 
-    private void greeting(RoutingContext rc) {
-        String name = rc.request().getParam("name");
-        if (name == null) {
-            name = "World";
-        }
+    private void writeMessage(RoutingContext context, String message) {
+        writeMessage(context, message, 200);
+    }
 
-        JsonObject response = new JsonObject()
-                .put("content", String.format(template, name));
-
-        rc.response()
+    private void writeMessage(RoutingContext context, String message, int statusCode) {
+        context.response()
                 .putHeader(CONTENT_TYPE, "application/json; charset=utf-8")
-                .end(response.encodePrettily());
+                .setStatusCode(statusCode)
+                .end(new JsonObject().put("message", message).encodePrettily());
     }
 
     private void login(RoutingContext rc) {
         String username = rc.request().getParam("username");
         String password = rc.request().getParam("password");
 
-        //noinspection StatementWithEmptyBody
         if (username == null || password == null) {
-            //Error
+            writeMessage(rc, "username or password not specified", 401);
+        } else if (username.equals("") || password.equals("")) {
+            writeMessage(rc, "username or password can't be nothing");
+        } else {
+            sql.querySingleWithParams("SELECT id FROM users WHERE username=? AND password=?", new JsonArray(Arrays.asList(username, password)), event -> {
+                if (event.succeeded()) {
+                    if (event.result() != null && event.result().getInteger(0) != null) {
+                        rc.session().put("userid", event.result().getInteger(0));
+                        writeMessage(rc, "ok");
+                    } else if (event.result() == null) {
+                        writeMessage(rc, "user-or-password-wrong", 401);
+                    }
+                } else {
+                    event.cause().printStackTrace();
+                    writeMessage(rc, "unknown-error", 500);
+                }
+            });
         }
+    }
 
-        JsonObject jsonResponse = new JsonObject().put("userpass", username + password);
-        rc.response()
-                .putHeader(CONTENT_TYPE, "application/json; charset=utf-8")
-                .end(jsonResponse.encodePrettily());
+    private void logout(RoutingContext rc) {
+        rc.session().remove("userid");
+        writeMessage(rc, "ok");
     }
 }

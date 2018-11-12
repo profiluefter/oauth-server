@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ProfiAuth</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#submit').click(function (e) {
+                var username = $('#username').val();
+                var password = $('#password').val();
+                if (username !== "" || password !== "") {
+                    $.ajax({
+                        dataType: "json",
+                        url: "/api/login?username=" + encodeURI(username) + "&password=" + encodeURI(password),
+                        complete: function (data) {
+                            switch (data.responseJSON.message) {
+                                case "ok":
+                                    alert("logged in!");
+                                    break;
+                                case "user-or-password-wrong":
+                                    alert("wrong username or password!");
+                                    break;
+                                case "unknown-error":
+                                    alert("There was an unknown server error!");
+                                    break;
+                                default:
+                                    alert("There was an unknown error!");
+                            }
+                        }
+                    });
+                }
+                e.preventDefault();
+            });
+        });
+    </script>
+</head>
+<body>
+<form>
+    <input id="username" type="text" title="username" required autofocus>
+    <input id="password" type="password" title="password" required>
+    <input type="submit" id="submit">
+</form>
+</body>
+</html>
