@@ -42,7 +42,6 @@ public class HttpApplicationTest {
         vertx.close(context.asyncAssertSuccess());
     }
 
-    //Todo: logging
     @Test
     public void testLogin(TestContext context) {
         logger.trace("Started login test.");
