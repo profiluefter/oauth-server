@@ -12,8 +12,6 @@ import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 
-import java.util.Arrays;
-
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
 public class HttpApplication extends AbstractVerticle {
@@ -31,6 +29,7 @@ public class HttpApplication extends AbstractVerticle {
 
         router.get("/api/login").handler(this::login);
         router.get("/api/logout").handler(this::logout);
+        router.get("/api/me").handler(this::me);
         router.get("/*").handler(StaticHandler.create());
 
 
@@ -56,10 +55,27 @@ public class HttpApplication extends AbstractVerticle {
     }
 
     private void writeMessage(RoutingContext context, String message, int statusCode) {
+        writeMessage(context, message, statusCode, null);
+    }
+
+    private void writeMessage(RoutingContext context, String message, int statusCode, JsonObject content) {
+        JsonObject jsonObject = new JsonObject().put("message", message);
+        if (content != null) {
+            jsonObject.put("content", content);
+        }
         context.response()
                 .putHeader(CONTENT_TYPE, "application/json; charset=utf-8")
                 .setStatusCode(statusCode)
-                .end(new JsonObject().put("message", message).encodePrettily());
+                .end(jsonObject.encodePrettily());
+    }
+
+    private void me(RoutingContext rc) {
+        Object userid = rc.session().get("userid");
+        if (userid == null) {
+            writeMessage(rc, "login-needed", 401);
+        } else {
+            writeMessage(rc, "ok", 200, new JsonObject().put("userid", userid));
+        }
     }
 
     private void login(RoutingContext rc) {
@@ -71,7 +87,7 @@ public class HttpApplication extends AbstractVerticle {
         } else if (username.equals("") || password.equals("")) {
             writeMessage(rc, "username or password can't be nothing");
         } else {
-            sql.querySingleWithParams("SELECT id FROM users WHERE username=? AND password=?", new JsonArray(Arrays.asList(username, password)), event -> {
+            sql.querySingleWithParams("SELECT id FROM users WHERE username=? AND password=?", new JsonArray().add(username).add(password), event -> {
                 if (event.succeeded()) {
                     if (event.result() != null && event.result().getInteger(0) != null) {
                         rc.session().put("userid", event.result().getInteger(0));
