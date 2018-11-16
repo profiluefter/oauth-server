@@ -7,14 +7,16 @@ import io.vertx.ext.web.RoutingContext;
 
 class UserAuthHandler {
 	static void me(RoutingContext rc) {
-		Object userid = rc.session().get("userid"); if(userid == null)
+		Object userid = rc.session().get("userid");
+		if(userid == null)
 			writeMessage(rc, "login-needed", 401);
 		else
 			writeMessage(rc, "ok", 200, new JsonObject().put("userid", userid));
 	}
 
 	static void login(RoutingContext rc) {
-		String username = rc.request().getParam("username"); String password = rc.request().getParam("password");
+		String username = rc.request().getParam("username");
+		String password = rc.request().getParam("password");
 
 		if(username == null || password == null)
 			writeMessage(rc, "username or password not specified", 401);
@@ -25,17 +27,20 @@ class UserAuthHandler {
 					new JsonArray().add(username).add(password), event -> {
 				if(event.succeeded()) {
 					if(event.result() != null && event.result().getInteger(0) != null) {
-						rc.session().put("userid", event.result().getInteger(0)); writeMessage(rc, "ok");
+						rc.session().put("userid", event.result().getInteger(0));
+						writeMessage(rc, "ok");
 					} else if(event.result() == null) {
 						writeMessage(rc, "user-or-password-wrong", 401);
 					}
 				} else {
-					event.cause().printStackTrace(); writeMessage(rc, "unknown-error", 500);
+					event.cause().printStackTrace();
+					writeMessage(rc, "unknown-error", 500);
 				}
 			});
 	}
 
 	static void logout(RoutingContext rc) {
-		rc.session().remove("userid"); writeMessage(rc, "ok");
+		rc.session().remove("userid");
+		writeMessage(rc, "ok");
 	}
 }

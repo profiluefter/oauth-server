@@ -23,7 +23,8 @@ public class HttpApplication extends AbstractVerticle {
 		router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
 
 		router.get("/api/login").handler(UserAuthHandler::login);
-		router.get("/api/logout").handler(UserAuthHandler::logout); router.get("/api/me").handler(UserAuthHandler::me);
+		router.get("/api/logout").handler(UserAuthHandler::logout);
+		router.get("/api/me").handler(UserAuthHandler::me);
 		router.get("/*").handler(StaticHandler.create());
 
 		sql = JDBCClient.createShared(vertx, new JsonObject().put("url", "jdbc:sqlite:database.sqlite3").put(
@@ -35,7 +36,8 @@ public class HttpApplication extends AbstractVerticle {
 				config().getInteger("http.port", 8080), ar -> {
 					if(ar.succeeded()) {
 						System.out.println("Server started on port " + ar.result().actualPort());
-					} future.handle(ar.mapEmpty());
+					}
+					future.handle(ar.mapEmpty());
 				});
 	}
 
