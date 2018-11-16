@@ -6,9 +6,28 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script>
         $(document).ready(function () {
+            $('#username').keypress(function (event) {
+                if (event.which === 13) {
+                    let password = $('#password');
+                    password.focus();
+                    password.select();
+
+                    event.preventDefault();
+                }
+            });
+            $('#password').keypress(function (event) {
+                if (event.which === 13) {
+                    let username = $('#username');
+                    username.focus();
+                    username.select();
+                    $('#submit').click();
+                    event.preventDefault();
+                }
+            });
+
             $('#submit').click(function (e) {
-                var username = $('#username').val();
-                var password = $('#password').val();
+                let username = $('#username').val();
+                let password = $('#password').val();
                 if (username !== "" || password !== "") {
                     // noinspection JSUnusedGlobalSymbols
                     $.ajax({
@@ -34,20 +53,20 @@
                 }
                 e.preventDefault();
             });
+
             $.ajax({
                 dataType: "json",
                 url: "/api/me",
                 complete: function (data) {
-                    console.trace("lohl");
-                    var $useridElement = $('#userid');
+                    let $useridElement = $('#userid');
                     // noinspection JSUnresolvedVariable
                     switch (data.responseJSON.message) {
                         case "ok":
                             // noinspection JSUnresolvedVariable
-                            $useridElement.text(data.responseJSON.content.userid);
+                            $useridElement.text("UserID: " + data.responseJSON.content.userid);
                             break;
                         case "login-needed":
-                            $useridElement.text("You need to log in!");
+                            $useridElement.text("Not logged in!");
                             break;
                         default:
                             alert("There was an unknown error!");
@@ -58,7 +77,7 @@
     </script>
 </head>
 <body>
-<p id="userid">loading</p>
+<span id="userid">loading...</span>
 <form>
     <input id="username" type="text" title="username" required autofocus>
     <input id="password" type="password" title="password" required>
