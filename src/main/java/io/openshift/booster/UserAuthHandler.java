@@ -7,21 +7,20 @@ import io.vertx.ext.web.RoutingContext;
 
 class UserAuthHandler {
 	static void me(RoutingContext rc) {
-		Object userid = rc.session().get("userid"); if(userid == null) {
+		Object userid = rc.session().get("userid"); if(userid == null)
 			writeMessage(rc, "login-needed", 401);
-		} else {
+		else
 			writeMessage(rc, "ok", 200, new JsonObject().put("userid", userid));
-		}
 	}
 
 	static void login(RoutingContext rc) {
 		String username = rc.request().getParam("username"); String password = rc.request().getParam("password");
 
-		if(username == null || password == null) {
+		if(username == null || password == null)
 			writeMessage(rc, "username or password not specified", 401);
-		} else if(username.equals("") || password.equals("")) {
+		else if(username.equals("") || password.equals(""))
 			writeMessage(rc, "username or password can't be nothing");
-		} else {
+		else
 			HttpApplication.sql.querySingleWithParams("SELECT id FROM users WHERE username=? AND password=?",
 					new JsonArray().add(username).add(password), event -> {
 				if(event.succeeded()) {
@@ -34,7 +33,6 @@ class UserAuthHandler {
 					event.cause().printStackTrace(); writeMessage(rc, "unknown-error", 500);
 				}
 			});
-		}
 	}
 
 	static void logout(RoutingContext rc) {
