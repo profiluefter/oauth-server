@@ -46,7 +46,7 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-dropwizard-metrics</artifactId>
-            <version>3.5.4</version>
+            <version>3.9.2</version>
         </dependency>
         <dependency>
             <groupId>org.xerial</groupId>
